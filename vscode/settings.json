@@ -1,0 +1,30 @@
+{
+  // --- Font ---
+  "editor.fontFamily": "'JetBrainsMono Nerd Font', monospace",
+  "editor.fontSize": 13,
+  "editor.fontLigatures": true,
+  "terminal.integrated.fontFamily": "'JetBrainsMono Nerd Font'",
+  "terminal.integrated.fontSize": 13,
+  // --- Terminal: point to zsh ---
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "/bin/zsh",
+      "args": ["-l"], // login shell so .zprofile runs (loads brew PATH, etc.)
+    },
+  },
+  // --- Editor quality-of-life ---
+  "editor.formatOnSave": true,
+  "editor.rulers": [120],
+  "editor.renderWhitespace": "boundary",
+  "editor.minimap.enabled": false,
+  "editor.cursorBlinking": "smooth",
+  "editor.smoothScrolling": true,
+  "editor.stickyScroll.enabled": true,
+  // --- Git ---
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "workbench.activityBar.location": "top",
+  "workbench.colorTheme": "Dark Modern",
+  "security.workspace.trust.untrustedFiles": "open",
+}
