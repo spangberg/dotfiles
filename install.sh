@@ -2,7 +2,7 @@
 #
 # Bootstrap a macOS machine from this dotfiles repo.
 # Safe to re-run: installs are skipped when already present,
-# and existing config files are backed up before being replaced by symlinks.
+# and differing config files are backed up before being overwritten.
 
 set -euo pipefail
 
@@ -11,19 +11,26 @@ BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y-%m-%d-%H%M%S)"
 
 info() { printf '\n\033[1;34m==>\033[0m \033[1m%s\033[0m\n' "$1"; }
 
-# link <repo-relative-src> <absolute-dst>
-# Backs up a pre-existing regular file at dst, then (re)creates the symlink.
-link() {
+# put <repo-relative-src> <absolute-dst>
+# Copies the repo file into place.
+# A pre-existing different file at dst is backed up first; an identical one is left alone.
+put() {
   local rel="$1" dst="$2"
   local src="$DOTFILES_DIR/$rel"
   mkdir -p "$(dirname "$dst")"
-  if [[ -e "$dst" && ! -L "$dst" ]]; then
+  if [[ -L "$dst" ]]; then
+    command rm "$dst"
+  elif [[ -e "$dst" ]]; then
+    if cmp -s "$src" "$dst"; then
+      printf '    %s is up to date\n' "$dst"
+      return
+    fi
     mkdir -p "$BACKUP_DIR"
     command mv "$dst" "$BACKUP_DIR/${rel//\//_}"
     printf '    backed up existing file to %s\n' "$BACKUP_DIR/${rel//\//_}"
   fi
-  ln -sfn "$src" "$dst"
-  printf '    %s -> %s\n' "$dst" "$src"
+  command cp "$src" "$dst"
+  printf '    installed %s\n' "$dst"
 }
 
 [[ "$(uname)" == "Darwin" ]] || {
@@ -71,16 +78,16 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 
 # ----------------------------------------------------------------------------
-# Symlink configuration files
+# Copy configuration files into place
 # ----------------------------------------------------------------------------
-info "Linking dotfiles"
-link zsh/.zshrc "$HOME/.zshrc"
-link zsh/.zshenv "$HOME/.zshenv"
-link zsh/.zprofile "$HOME/.zprofile"
-link zsh/.p10k.zsh "$HOME/.p10k.zsh"
-link git/.gitconfig "$HOME/.gitconfig"
-link claude/CLAUDE.md "$HOME/.claude/CLAUDE.md"
-link claude/settings.json "$HOME/.claude/settings.json"
-link vscode/settings.json "$HOME/Library/Application Support/Code/User/settings.json"
+info "Installing config files"
+put zsh/.zshrc "$HOME/.zshrc"
+put zsh/.zshenv "$HOME/.zshenv"
+put zsh/.zprofile "$HOME/.zprofile"
+put zsh/.p10k.zsh "$HOME/.p10k.zsh"
+put git/.gitconfig "$HOME/.gitconfig"
+put claude/CLAUDE.md "$HOME/.claude/CLAUDE.md"
+put claude/settings.json "$HOME/.claude/settings.json"
+put vscode/settings.json "$HOME/Library/Application Support/Code/User/settings.json"
 
 info "Done. Open a new terminal to load the new shell configuration."
